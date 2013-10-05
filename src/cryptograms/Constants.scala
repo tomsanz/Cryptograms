@@ -1,6 +1,8 @@
 package cryptograms
 
 object Constants {
+  
+  // 
   val letterBestChance = Map('e' -> 1257, 't' -> 908,
     'a' -> 800, 'o' -> 7591, 'i' -> 692, 'n' -> 690, 's' -> 634,
     'h' -> 623, 'r' -> 595, 'd' -> 431, 'l' -> 405, 'u' -> 284,

@@ -5,7 +5,7 @@ object Dave {
   def main(args: Array[String]): Unit = {
 
     //    val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-//    println(Constants.letterBestChance.keys)
+    //    println(Constants.letterBestChance.keys)
     //
     //    var test = true
     //
@@ -16,9 +16,20 @@ object Dave {
     //      println("Encoded message is: " + j)
     //      println("Decoded message is: " + decode(j, testCode))
     //    }
-    val quotes = fileRead.getFile.map(x => x drop 2)
-    quotes.map(x => x.toUpperCase.filter(_.isLetter).distinct) foreach println
-    println(quotes.map(x => x.toUpperCase.filter(_.isLetter).distinct.length).sum/quotes.length.toDouble)
+    
+    val quotes: List[String] = fileRead.getFile.map(x => x drop 2)
+    
+    //quotes.map(x => x.toUpperCase.filter(_.isLetter).distinct) foreach println
+
+    // print out average distinct letters used in each quote.
+    println("Average number of distinct letters used in each sentence:")
+    println(quotes.map(x => x.toUpperCase.filter(_.isLetter).distinct.length).sum / quotes.length.toDouble)
+
+    val wordsList = quotes.map(x => x.split("\\W+")).flatten.map(_.toUpperCase)
+    
+    // print out size of total words used. 
+    println(s"Word set has ${wordsList.size} of words")
+    println(s"Word set has ${wordsList.toSet.size} of distinct words")
   }
 
   def encode(plainText: String, code: String): String = {
