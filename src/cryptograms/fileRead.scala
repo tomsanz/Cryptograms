@@ -10,4 +10,11 @@ object fileRead {
     file.close()
     quotes
   }
+  
+  def getWords = {
+    val file = Source.fromFile("data/mostUsedWords.txt")
+    val words = file.getLines.toList
+    file.close()
+    words
+  }
 }
