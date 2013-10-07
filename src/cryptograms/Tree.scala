@@ -1,10 +1,12 @@
 package cryptograms
 
+class CipherWord(val cipherW: String, val plainW: String, val score: Int)
+
 abstract class Node
 
-class EmptyNode extends Node {
+class EmptyNode extends Node {}
 
-}
+class Root extends Node {}
 
-class NonEmptyNode(cipherW: String, plainW: String, score: Int) extends Node
+class NonEmptyNode(CipherSet: CipherWord) extends Node
 

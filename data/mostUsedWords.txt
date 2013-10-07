@@ -997,7 +997,7 @@
 942	film
 942	mouth
 943	Corps
-943	importance				
+943	importance
 944	touch
 947	director
 948	ship
@@ -1997,4 +1997,4 @@
 1725	officials
 1725	operator
 1726	Senate
-1727	lend				
+1727	lend
