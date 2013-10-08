@@ -21,10 +21,9 @@ object Constants {
   // one quote per element.
   val quotes: List[String] = getFile(quotesPath).map(x => x drop 2)
   // Load the top 2000 most used Englisth words into a List of string 
-  val words = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-  // Organize the top 2000 words into sub-category. 
-  val patternMap = words.foldLeft(
-    new HashMap[String, collection.mutable.Set[String]]() with MultiMap[String, String])(
-      (m, c) => m.addBinding(pattern(c), c))
+  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
 
+  val patternList = wordsList.map(pattern(_))
+  // Organize the top 2000 words into sub-category. 
+  val patternMap = patternList zip wordsList
 }

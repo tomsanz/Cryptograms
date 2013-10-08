@@ -23,7 +23,12 @@ class SetSuite extends FunSuite {
     assert(Dave.pattern("ttat") == "AACA")
   }
 
-  test("discoverCode") {
+  test("test isConflict") {
+    assert(Dave.isConflict("***I*******U**B*****S*F***", "***I*******U**B*****S*F***"))
+    assert(!Dave.isConflict("***I*******U**B*****S*F***", "*A*******G****************"))
+  }
+
+  ignore("discoverCode") {
     assert(Dave.discoverCode("Hello World!") == "HELLO")
   }
 
