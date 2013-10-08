@@ -8,5 +8,5 @@ class EmptyNode extends Node {}
 
 class Root extends Node {}
 
-class NonEmptyNode(CipherSet: CipherWord) extends Node
+class NonEmptyNode() extends Node
 

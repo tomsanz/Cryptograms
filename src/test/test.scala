@@ -16,12 +16,13 @@ class SetSuite extends FunSuite {
     assert(Dave.decode("IFMMP", testCode) === "HELLO")
     assert(Dave.decode("IFMMP", testCode) != "Hello")
   }
-  
+
   test("test pattern matching") {
     assert(Dave.pattern("this") == "ABCD")
     assert(Dave.pattern("that") == "ABCA")
+    assert(Dave.pattern("ttat") == "AACA")
   }
-  
+
   test("discoverCode") {
     assert(Dave.discoverCode("Hello World!") == "HELLO")
   }
