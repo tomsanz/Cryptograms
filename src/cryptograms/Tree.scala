@@ -1,27 +1,23 @@
 package cryptograms
 
-class CipherWord(val cipherW: String, val plainW: String, val score: Int) {
+class CipherWordSet(val cipherW: String, val plainW: collection.mutable.Set[String]) {
   override def toString = "cipherWord is " + cipherW + ", and plain Word is: " + plainW
+  def zippedSet = Set(cipherW).zipAll(plainW, cipherW, "")
 }
 
 abstract class Node {
-  def include(c: CipherWord): Node
+  def include(c: CipherWordSet): Node
   def isEmpty: Boolean
 }
 
-class EmptyNode extends Node {
-  def include(c: CipherWord) = new NonEmptyNode(c, new EmptyNode)
+object EmptyNode extends Node {
+  def include(c: CipherWordSet) = new NonEmptyNode(c, EmptyNode)
   def isEmpty = true
 }
 
-class Root extends Node {
+class NonEmptyNode(val cipherWordSet: CipherWordSet, nextNode: Node) extends Node {
   def isEmpty = false
-  def include(c: CipherWord): Node = ???
-}
-
-class NonEmptyNode(c: CipherWord, keys: Node*) extends Node {
-  def isEmpty = false
-  def include(c: CipherWord): Node = ???
-
+  def include(cWord: CipherWordSet): Node = new NonEmptyNode(cWord, this)
+  override def toString = cipherWordSet.toString + "\n" + nextNode.toString
 }
 
