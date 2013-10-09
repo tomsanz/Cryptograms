@@ -16,7 +16,6 @@ object Dave {
     println(testingQuote)
     println(encodedMessage)
     println(decodedMessage)
-
   }
 
   /**
@@ -52,7 +51,14 @@ object Dave {
   def isConflict(newCode: String, oldCode: String): Boolean = {
     var res = false
     for (i <- 0 until 26)
-      if (newCode(i).isLetter && oldCode(i).isLetter && newCode(i) != oldCode(i))
+      if (newCode(i).isLetter && oldCode(i).isLetter &&
+        newCode(i) != oldCode(i))
+        res = true
+
+    for (i <- 0 until 26)
+      if (newCode(i).isLetter &&
+        oldCode.contains(newCode(i)) &&
+        i != oldCode.indexOf(newCode(i)))
         res = true
     res
   }
@@ -81,10 +87,21 @@ object Dave {
     result
   }
 
+  def resetCnt(pNode: Node, cnt: Map[String, Int]) = ???
+
   def searchForCode(mTree: Node, traverseCnt: Map[String, Int]): String = {
     def findCode(mTree: Node, acc: String, cnt: Map[String, Int]): String = {
-      if (mTree.isEmpty) acc
-      else {
+      if (mTree.isEmpty) {
+        val nDistinctLetters = cnt.keySet.flatten.size
+        if (nDistinctLetters == acc.filter(_ != '*').size) acc
+        else {
+          // Resetting counter to previous position, and start the loop again.
+          val rCnt = resetCnt(mTree.parent, cnt)
+
+          // Restart loop. Need to change acc to previous position.
+          findCode(mTree.parent, acc, rCnt)
+        }
+      } else {
         println(acc)
         val currentCipherWord = mTree.cWord.cipherW
         val currentPos = cnt(currentCipherWord)
