@@ -10,18 +10,15 @@ abstract class Node {
   def isEmpty: Boolean
   def remove: Node
   def cWord: CipherWordSet
-  def parent: Node
+//  def parent: Node
 }
 
 object EmptyNode extends Node {
-  def include(c: CipherWordSet) = {
-    this.parent = c
-    new NonEmptyNode(c, EmptyNode)
-  }
+  def include(c: CipherWordSet) = new NonEmptyNode(c, EmptyNode)
   def isEmpty = true
   def remove: Node = EmptyNode
   def cWord = new CipherWordSet("", List(""))
-  def parent = EmptyNode
+//  def parent = EmptyNode
 }
 
 class NonEmptyNode(cipherWordSet: CipherWordSet, nextNode: Node) extends Node {
@@ -30,6 +27,6 @@ class NonEmptyNode(cipherWordSet: CipherWordSet, nextNode: Node) extends Node {
   override def toString = cipherWordSet.toString + "\n" + nextNode.toString
   def remove = nextNode
   def cWord = cipherWordSet
-  def parent = EmptyNode
+//  def parent = EmptyNode
 }
 

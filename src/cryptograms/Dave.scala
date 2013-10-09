@@ -91,16 +91,16 @@ object Dave {
 
   def searchForCode(mTree: Node, traverseCnt: Map[String, Int]): String = {
     def findCode(mTree: Node, acc: String, cnt: Map[String, Int]): String = {
-      if (mTree.isEmpty) {
-        val nDistinctLetters = cnt.keySet.flatten.size
-        if (nDistinctLetters == acc.filter(_ != '*').size) acc
-        else {
-          // Resetting counter to previous position, and start the loop again.
-          val rCnt = resetCnt(mTree.parent, cnt)
-
-          // Restart loop. Need to change acc to previous position.
-          findCode(mTree.parent, acc, rCnt)
-        }
+      if (mTree.isEmpty) { acc
+//        val nDistinctLetters = cnt.keySet.flatten.size
+//        if (nDistinctLetters == acc.filter(_ != '*').size) acc
+//        else {
+//          // Resetting counter to previous position, and start the loop again.
+//          val rCnt = resetCnt(mTree.parent, cnt)
+//
+//          // Restart loop. Need to change acc to previous position.
+//          findCode(mTree.parent, acc, rCnt)
+//        }
       } else {
         println(acc)
         val currentCipherWord = mTree.cWord.cipherW
