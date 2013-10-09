@@ -7,6 +7,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class SetSuite extends FunSuite {
   val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
+  val emptyCode = "*" * 26
+  val headCode = 'C' +: emptyCode.tail
 
   test("test Encoding") {
     assert(Dave.encode("Hello", testCode) === "IFMMP")
@@ -24,12 +26,8 @@ class SetSuite extends FunSuite {
   }
 
   test("test isConflict") {
-    assert(Dave.isConflict("***I*******U**B*****S*F***", "***I*******U**B*****S*F***"))
+    assert(Dave.isConflict(emptyCode, emptyCode))
     assert(!Dave.isConflict("***I*******U**B*****S*F***", "*A*******G****************"))
-  }
-
-  ignore("discoverCode") {
-    assert(Dave.discoverCode("Hello World!") == "HELLO")
   }
 
 }

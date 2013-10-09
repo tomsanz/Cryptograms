@@ -11,33 +11,39 @@ object Dave {
 
     val encodedMessage = encode(testingQuote, testCode)
     val discoveredCode = discoverCode(encodedMessage)
-    val decodedMessage = decode(encodedMessage, discoveredCode)
-
-    println(testingQuote)
-    println(encodedMessage)
-    println(decodedMessage)
+    //    val decodedMessage = decode(encodedMessage, discoveredCode)
+    //
+    //    println(testingQuote)
+    //    println(encodedMessage)
+    //    println(decodedMessage)
   }
 
   /**
    * Convert given string into pattern.
+   * For example given cipher word "DEQGC" will return "ABCDE" as pattern text.
    */
   def pattern(s: String) = s.tail.foldLeft("A")((res: String, y: Char) => res +
     (if (res.length != s.indexOf(y)) 'A' + s.indexOf(y) else 'A' + res.length).toChar)
-
+  /**
+   * Check if given string contain any letter.
+   */
   def isLetter(s: String) = s.exists(_.isLetter)
-
-  def generateList(s: String): List[String] = {
-    val (_, res) = patternMap.filter(_._1 == s).unzip
+  /**
+   * Given any pattern text, return the plain English words that match that pattern in a list.
+   * Also append an empty string as the last elem in the return List.
+   */
+  def generateList(patternText: String): List[String] = {
+    val (_, res) = patternMap.filter(_._1 == patternText).unzip
     res ::: List("")
   }
 
-  def getTree(sList: List[String]): Node = {
+  /*def getTree(sList: List[String]): Node = {
     def buildTree(sList: List[String], acc: Node): Node =
       if (sList.isEmpty) acc
       else buildTree(sList.init, acc.include(new CipherWordSet(sList.last,
         generateList(pattern(sList.last)))))
     buildTree(sList, EmptyNode)
-  }
+  }*/
 
   def sortWordMessage(m: String, message: Set[String]) = {
     def f(s: Set[String], acc: List[String]): List[String] = {
@@ -48,19 +54,31 @@ object Dave {
     }
     f(message - m, List(m))
   }
+  /**
+   * Check if the given pair of code has any of the two conflicts:
+   * 1. If any letter got assigned to two different letter code
+   * 2. If any two letters got assigned to the same letter.
+   */
   def isConflict(newCode: String, oldCode: String): Boolean = {
-    var res = false
-    for (i <- 0 until 26)
-      if (newCode(i).isLetter && oldCode(i).isLetter &&
-        newCode(i) != oldCode(i))
-        res = true
+    newCode.foldLeft(false)((res, y) => {
+      println(y)
+      println((y.isLetter && oldCode.contains(y)))
+      println(y.isLetter && oldCode(newCode.indexOf(y)).isLetter)
+      res && ((y.isLetter && oldCode.contains(y)) ||
+        (y.isLetter && oldCode(newCode.indexOf(y)).isLetter))
+    })
 
+    /*var res = false
     for (i <- 0 until 26)
       if (newCode(i).isLetter &&
+        oldCode(i).isLetter &&
+        newCode(i) != oldCode(i))
+        res = true
+      else if (newCode(i).isLetter &&
         oldCode.contains(newCode(i)) &&
         i != oldCode.indexOf(newCode(i)))
         res = true
-    res
+    res*/
   }
 
   def getCode(cipher: String, plain: String) = {
@@ -87,7 +105,7 @@ object Dave {
     result
   }
 
-  def resetCnt(pNode: Node, cnt: Map[String, Int]) = ???
+  /*def resetCnt(pNode: Node, cnt: Map[String, Int]) = ???
 
   def searchForCode(mTree: Node, traverseCnt: Map[String, Int]): String = {
     def findCode(mTree: Node, acc: String, cnt: Map[String, Int]): String = {
@@ -115,29 +133,63 @@ object Dave {
       }
     }
     findCode(mTree, "*" * 26, traverseCnt)
-  }
+  }*/
 
+  def createTree(message: List[String]): List[Node] = {
+    val plainTextList = generateList(pattern(message.last))
+    def appendEmptyNode(cipher: String, plainList: List[String], acc: List[Node]): List[Node] = {
+      if (plainList.isEmpty) acc
+      else {
+        val neighborNode = if (acc.isEmpty) EmptyNode else acc.last
+        val cNode = Node(cipher, plainList.last, neighborNode, EmptyNode)
+        appendEmptyNode(cipher, plainList.init, acc :+ cNode)
+      }
+    }
+    appendEmptyNode(message.last, plainTextList, List[Node]())
+  }
+  /**
+   * Find the code used to decipher the given encrypted text.
+   */
   def discoverCode(message: String): String = {
     // Convert input cipher message into a Set, and remove any white space in between words.
     val messageSet = message.toUpperCase.split("\\W+").filter(isLetter(_)).toSet
     // Find the word where the total length of the word divided by the total 
     // distinct letters in such word is maximum. Break ties arbitrarily.
     val firstWord = messageSet.maxBy(x => x.length / x.distinct.length.toDouble).toString
-    // Get the sorted message. 
+    // Get the sorted message into a List
     val messageSorted = sortWordMessage(firstWord, messageSet)
 
+    /* print out how many children nodes we would need if we create the full tree */
+    //    val tempInt = messageSorted.foldLeft(1L)((x,y) => {
+    //      print(generateList(pattern(y)).size + " * ")
+    //      x * (generateList(pattern(y)).size)})
+    //    println(s"Potential list size is: " + tempInt)
+
+    val messageTree = createTree(messageSorted)
+
+    messageTree foreach { x =>
+      println(x)
+    }
+
+    // Create a counter which will keep track of which Node has been visited.
     val traverseCnt = messageSorted.foldLeft(Map[String, Int]())(
       (m, s) => m + (s -> 0))
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
-    val messageTree = getTree(messageSorted)
+    //    val messageTree = getTree(messageSorted)
 
-    searchForCode(messageTree, traverseCnt)
+    //    searchForCode(messageTree, traverseCnt)
+    message
   }
-
+  /**
+   * Given plain English text, returns a encoded message using the provided code.
+   */
   def encode(plainText: String, code: String): String = {
     plainText map { x => if (!x.isLetter) x else code(x.toUpper - 'A') }
   }
+  /**
+   * Given encoded text, decode using the code provided and return a plain English text.
+   */
   def decode(encodedText: String, code: String): String = {
     encodedText map { x => if (!x.isLetter) x else ('A' + code.indexOf(x.toUpper)).toChar }
   }
