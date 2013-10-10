@@ -13,8 +13,8 @@ object Dave {
     val discoveredCode = discoverCode(encodedMessage)
     //    val decodedMessage = decode(encodedMessage, discoveredCode)
     //
-    //    println(testingQuote)
-    //    println(encodedMessage)
+    println(testingQuote)
+    println(encodedMessage)
     //    println(decodedMessage)
   }
 
@@ -60,25 +60,9 @@ object Dave {
    * 2. If any two letters got assigned to the same letter.
    */
   def isConflict(newCode: String, oldCode: String): Boolean = {
-    newCode.foldLeft(false)((res, y) => {
-      println(y)
-      println((y.isLetter && oldCode.contains(y)))
-      println(y.isLetter && oldCode(newCode.indexOf(y)).isLetter)
-      res && ((y.isLetter && oldCode.contains(y)) ||
-        (y.isLetter && oldCode(newCode.indexOf(y)).isLetter))
-    })
-
-    /*var res = false
-    for (i <- 0 until 26)
-      if (newCode(i).isLetter &&
-        oldCode(i).isLetter &&
-        newCode(i) != oldCode(i))
-        res = true
-      else if (newCode(i).isLetter &&
-        oldCode.contains(newCode(i)) &&
-        i != oldCode.indexOf(newCode(i)))
-        res = true
-    res*/
+    newCode.foldLeft(false)((res, y) =>
+      res || ((y.isLetter && oldCode.contains(y)) ||
+        (y.isLetter && oldCode(newCode.indexOf(y)).isLetter)))
   }
 
   def getCode(cipher: String, plain: String) = {
@@ -110,15 +94,15 @@ object Dave {
   def searchForCode(mTree: Node, traverseCnt: Map[String, Int]): String = {
     def findCode(mTree: Node, acc: String, cnt: Map[String, Int]): String = {
       if (mTree.isEmpty) { acc
-//        val nDistinctLetters = cnt.keySet.flatten.size
-//        if (nDistinctLetters == acc.filter(_ != '*').size) acc
-//        else {
-//          // Resetting counter to previous position, and start the loop again.
-//          val rCnt = resetCnt(mTree.parent, cnt)
-//
-//          // Restart loop. Need to change acc to previous position.
-//          findCode(mTree.parent, acc, rCnt)
-//        }
+        val nDistinctLetters = cnt.keySet.flatten.size
+        if (nDistinctLetters == acc.filter(_ != '*').size) acc
+        else {
+          // Resetting counter to previous position, and start the loop again.
+          val rCnt = resetCnt(mTree.parent, cnt)
+
+          // Restart loop. Need to change acc to previous position.
+          findCode(mTree.parent, acc, rCnt)
+        }
       } else {
         println(acc)
         val currentCipherWord = mTree.cWord.cipherW
@@ -135,22 +119,25 @@ object Dave {
     findCode(mTree, "*" * 26, traverseCnt)
   }*/
 
-  def createTree(message: List[String]): List[Node] = {
-    val plainTextList = generateList(pattern(message.last))
-    def appendEmptyNode(cipher: String, plainList: List[String], acc: List[Node]): List[Node] = {
-      if (plainList.isEmpty) acc
-      else {
-        val neighborNode = if (acc.isEmpty) EmptyNode else acc.last
-        val cNode = Node(cipher, plainList.last, neighborNode, EmptyNode)
-        appendEmptyNode(cipher, plainList.init, acc :+ cNode)
-      }
+  def createTree(message: List[String]): Node = {
+    def loop(cipher: List[String],
+      plainText: List[String],
+      acc: Node, childNode: Node): Node = {
+      if (plainText.isEmpty && cipher.size == 1) acc
+      else if (plainText.isEmpty) {
+        val newCipher = cipher.init
+        val newPlainText = generateList(pattern(newCipher.last))
+        loop(newCipher, newPlainText.init,
+          Node(newCipher.last, newPlainText.last, EmptyNode, acc), childNode)
+      } else loop(cipher, plainText.init,
+        Node(cipher.last, plainText.last, acc, childNode), childNode)
     }
-    appendEmptyNode(message.last, plainTextList, List[Node]())
+    loop(message, generateList(pattern(message.last)), EmptyNode, EmptyNode)
   }
   /**
    * Find the code used to decipher the given encrypted text.
    */
-  def discoverCode(message: String): String = {
+  def discoverCode(message: String) = {
     // Convert input cipher message into a Set, and remove any white space in between words.
     val messageSet = message.toUpperCase.split("\\W+").filter(isLetter(_)).toSet
     // Find the word where the total length of the word divided by the total 
@@ -164,16 +151,12 @@ object Dave {
     //      print(generateList(pattern(y)).size + " * ")
     //      x * (generateList(pattern(y)).size)})
     //    println(s"Potential list size is: " + tempInt)
-
+    //    println(messageSorted)
     val messageTree = createTree(messageSorted)
-
-    messageTree foreach { x =>
-      println(x)
-    }
-
+    println(messageTree.toString)
     // Create a counter which will keep track of which Node has been visited.
-    val traverseCnt = messageSorted.foldLeft(Map[String, Int]())(
-      (m, s) => m + (s -> 0))
+    /*    val traverseCnt = messageSorted.foldLeft(Map[String, Int]())(
+      (m, s) => m + (s -> 0))*/
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
     //    val messageTree = getTree(messageSorted)

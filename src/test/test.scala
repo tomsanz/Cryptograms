@@ -26,7 +26,8 @@ class SetSuite extends FunSuite {
   }
 
   test("test isConflict") {
-    assert(Dave.isConflict(emptyCode, emptyCode))
+    assert(!Dave.isConflict(emptyCode, emptyCode))
+    assert(Dave.isConflict(headCode, testCode))
     assert(!Dave.isConflict("***I*******U**B*****S*F***", "*A*******G****************"))
   }
 
