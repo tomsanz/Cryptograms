@@ -3,20 +3,23 @@ import cryptograms.Dave
 import org.scalatest.FunSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import cryptograms.Code
 
 @RunWith(classOf[JUnitRunner])
 class SetSuite extends FunSuite {
-  val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-  val emptyCode = "*" * 26
-  val headCode = 'C' +: emptyCode.tail
+  val testCode = new Code("BCDEFGHIJKLMNOPQRSTUVWXYZA")
+  val emptyCode = new Code("*" * 26)
+  val headCode = new Code("C" + "*" * 25)
+  val code1 = new Code("***I*******U**B*****S*F***")
+  val code2 = new Code("*A*******G****************")
 
   test("test Encoding") {
-    assert(Dave.encode("Hello", testCode) === "IFMMP")
+    assert(Dave.encode("Hello", testCode()) === "IFMMP")
   }
 
   test("test Decoding") {
-    assert(Dave.decode("IFMMP", testCode) === "HELLO")
-    assert(Dave.decode("IFMMP", testCode) != "Hello")
+    assert(Dave.decode("IFMMP", testCode.code) === "HELLO")
+    assert(Dave.decode("IFMMP", testCode.code) != "Hello")
   }
 
   test("test pattern matching") {
@@ -26,9 +29,10 @@ class SetSuite extends FunSuite {
   }
 
   test("test isConflict") {
-    assert(!Dave.isConflict(emptyCode, emptyCode))
-    assert(Dave.isConflict(headCode, testCode))
-    assert(!Dave.isConflict("***I*******U**B*****S*F***", "*A*******G****************"))
+    assert(!(emptyCode isConflict emptyCode))
+    assert(headCode isConflict testCode)
+    assert(!(testCode isConflict testCode))
+    assert(!(code1 isConflict code2))
   }
 
 }
