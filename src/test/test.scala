@@ -12,6 +12,8 @@ class SetSuite extends FunSuite {
   val headCode = new Code("C" + "*" * 25)
   val code1 = new Code("***I*******U**B*****S*F***")
   val code2 = new Code("*A*******G****************")
+  val code3 = new Code("A**D*****G****************")
+  val code4 = new Code("*B**L*****G***************")
 
   test("test Encoding") {
     assert(Dave.encode("Hello", testCode()) === "IFMMP")
@@ -29,10 +31,14 @@ class SetSuite extends FunSuite {
   }
 
   test("test isConflict") {
-    assert(!(emptyCode isConflict emptyCode))
     assert(headCode isConflict testCode)
+    assert(code2 isConflict code3)
+    assert(code3 isConflict code4)
+    assert(code2 isConflict code4)
+    
     assert(!(testCode isConflict testCode))
     assert(!(code1 isConflict code2))
+    assert(!(emptyCode isConflict emptyCode))
   }
 
 }

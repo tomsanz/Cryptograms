@@ -3,19 +3,21 @@ package cryptograms
 import Constants._
 import fileRead._
 import collection.mutable.{ Map, MultiMap }
+import scala.annotation.tailrec
 
 object Dave {
   def main(args: Array[String]): Unit = {
     val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-    val testingQuote = quotes(25)
+    val testingQuote = quotes(0)
 
     val encodedMessage = encode(testingQuote, testCode)
-    val discoveredCode = discoverCode(encodedMessage)
-    val decodedMessage = decode(encodedMessage, discoveredCode())
-
     println(testingQuote)
     println(encodedMessage)
     println("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+    val discoveredCode = discoverCode(encodedMessage)
+    val decodedMessage = decode(encodedMessage, discoveredCode())
+
     println(discoveredCode())
     println(decodedMessage)
   }
@@ -52,6 +54,7 @@ object Dave {
   def isBestCode(code: Code, mLetter: Int) = code().filter(_ != '*').size == mLetter
 
   def searchForCode(mTree: Node, maxDistinctLetters: Int): Set[Code] = {
+    @tailrec
     def loop(node: Node, result: Set[Code], stack: List[(Node, Code)]): Set[Code] = {
       // Base cases:
       if (node.isEmpty)
@@ -96,6 +99,7 @@ object Dave {
   def discoverCode(message: String) = {
     // Convert input cipher message into a Set, and remove any white space in between words.
     val messageSet = message.toUpperCase.split("\\W+").filter(isLetter(_)).toSet
+    println(messageSet)
     // Find the word where the total length of the word divided by the total 
     // distinct letters in such word is maximum. Break ties arbitrarily.
     val firstWord = messageSet.maxBy(x => x.length / x.distinct.length.toDouble).toString
@@ -104,8 +108,20 @@ object Dave {
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
     val messageTree = createTree(messageSorted)
+    println("Start searching for codes")
     val codeSet = searchForCode(messageTree, messageSet.flatten.size)
-    codeSet.maxBy((x: Code) => ((x.code).filter(ch => ch != '*')).length)
+    println("Found set of codes")
+
+    /*
+     * Find the best code by having the most amount of distinct letters in the code.
+     */
+    //    codeSet.maxBy((x: Code) => {
+    //      //      println(x() + " " + (x().filter(ch => ch != '*')).length)
+    //      (x().filter(ch => ch != '*')).length
+    //    })
+    codeSet.maxBy(x => {
+      decodeSpecial(message, x()).split("\\W+").map(
+          (elem: String) => dictMap.getOrElse(elem, 0)).sum})
   }
   /**
    * Given plain English text, returns a encoded message using the provided code.
@@ -125,5 +141,14 @@ object Dave {
       }
     }
   }
-
+  
+  def decodeSpecial(encodedText: String, code: String): String = {
+    encodedText map { x =>
+      if (!x.isLetter) x else {
+        if (code.indexOf(x.toUpper) != -1)
+          ('A' + code.indexOf(x.toUpper)).toChar
+        else 'a'
+      }
+    }
+  }
 }

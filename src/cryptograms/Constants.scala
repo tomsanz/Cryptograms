@@ -26,4 +26,8 @@ object Constants {
   val patternList = wordsList.map(pattern(_))
   // Organize the top 2000 words into sub-category. 
   val patternMap = patternList zip wordsList
+  
+  val dictionary = quotes.map(_.split("\\W+")).flatten.toSet.map((x: String) => x.toUpperCase)
+ 
+  val dictMap = dictionary.zipAll(Set(), "", 1).toMap
 }
