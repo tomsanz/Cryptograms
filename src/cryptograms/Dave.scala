@@ -2,7 +2,7 @@ package cryptograms
 
 import Constants._
 import fileRead._
-import collection.mutable.{ Map, MultiMap }
+import collection.mutable.{ Map, MultiMap, HashMap, Set }
 
 object Dave {
   def main(args: Array[String]): Unit = {
@@ -11,7 +11,7 @@ object Dave {
 
     val encodedMessage = encode(testingQuote, testCode)
     //    val encodedMessage = "Ubty lzm vz dy xzq j kzg dyrtqadtu, D rbdyn j vzzs rbdyv rz jen de dx rbtl tatq oqtee pbjqvte"
-    println(testingQuote)
+    /* println(testingQuote)
     println(encodedMessage)
     println("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
@@ -19,7 +19,7 @@ object Dave {
     val decodedMessage = decode(encodedMessage, discoveredCode())
 
     println(discoveredCode())
-    println(decodedMessage)
+    println(decodedMessage)*/
   }
 
   /**
@@ -103,32 +103,53 @@ object Dave {
     loop(message, generateList(pattern(message.last)), EmptyNode, EmptyNode)
   }
 
+  def getLetterSet(wordPair: (String, List[String])) = {
+    val tempMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
+    for (ch <- wordPair._1) {
+      for (word <- wordPair._2)
+        tempMap.addBinding(ch, word(wordPair._1.indexOf(ch)))
+    }
+    tempMap
+  }
+
+  def mergeMap(map1: HashMap[Char, Set[Char]] with MultiMap[Char, Char],
+    map2: HashMap[Char, Set[Char]] with MultiMap[Char, Char]) = {
+    val tempMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
+    val keys = map1.keySet union map2.keySet
+    for (key <- keys) {
+      val values = map1.getOrElse(key, Set()) intersect map2.getOrElse(key, Set())
+      for (v <- values)
+        tempMap.addBinding(key, v)
+    }
+    tempMap
+  }
   def findWordsMap(messageSorted: List[String]): List[(String, String)] = {
     // List of cipher text sentence converted to list of pattern text
     val patternList = messageSorted.map(x => pattern(x))
     // Generate list of matching plain words for each pattern text
-    val matchingPatternList = patternList.foldLeft(List[List[String]](List()))(
+    val matchingPlainWords = patternList.foldLeft(List[List[String]](List()))(
       (acc, x) => acc :+ generateList(x))
     // Group cipher text, cipher text's pattern text and list of plain words matching the pattern text
     // into a three elements-tuple.
-    def f1[A,B,C](t: ((A,B),C)) = (t._1._1, t._1._2, t._2)
-    val wordsPattern = messageSorted.zip(patternList).zip(matchingPatternList).map(f1)
+    val wordsPattern = messageSorted zip matchingPlainWords
 
-    def loop(wordsPattern: List[(String, String, List[String])],
-        letterMap: collection.mutable.HashMap[Char, Set[Char]] with MultiMap[Char, Char]) = {
-          // Find the first element that has a pattern.
-          if (wordsPattern.isEmpty)  letterMap
-          else {
-            val elem = pattern(wList.head)
-          }
-          
-        }
+    // Create mapping between cipher letter to possible plain text letter
+    def loop(wordsPattern: List[(String, List[String])],
+      acc: HashMap[Char, Set[Char]] with MultiMap[Char, Char]): HashMap[Char, Set[Char]] with MultiMap[Char, Char] = {
+      // Find the first element that has a pattern.
+      if (wordsPattern.isEmpty) acc
+      else {
+        loop(wordsPattern.tail, mergeMap(acc, getLetterSet(wordsPattern.head)))
+      }
+    }
+    val letterMap = loop(wordsPattern, new HashMap[Char, Set[Char]] with MultiMap[Char, Char])
+    
     List(("", ""))
   }
   /**
    * Find the code used to decipher the given encrypted text.
    */
-  def discoverCode(message: String) = {
+  /*def discoverCode(message: String) = {
     // Convert input cipher message into a Set, and remove any white space in between words.
     val messageSet = message.toUpperCase.split(textSplitter).filter(isLetter).toSet
     println(messageSet)
@@ -146,7 +167,7 @@ object Dave {
     val messageTree = createTree(messageSorted)
 
     searchForCode(messageTree, message)
-  }
+  }*/
   /**
    * Given plain English text, returns a encoded message using the provided code.
    */
