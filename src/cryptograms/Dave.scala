@@ -7,7 +7,7 @@ import collection.mutable.{ Map, MultiMap, HashMap, Set }
 object Dave {
   def main(args: Array[String]): Unit = {
     val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-    val testingQuote = "why business social power help"
+    val testingQuote = quotes(3600)
 
     val encodedMessage = encode(testingQuote, testCode)
     //    val encodedMessage = "Ubty lzm vz dy xzq j kzg dyrtqadtu," +
@@ -28,11 +28,12 @@ object Dave {
    * Convert given string into pattern.
    * For example given cipher word "DEQGC" will return "ABCDE" as pattern text.
    */
-  def pattern(s: String) = if (s.length == 1) "A"
-  else s.tail.foldLeft("A")((res, ch) => res + (
-    if (ch == ''') '''
-    else if (res.length != s.indexOf(ch)) ('A' + s.indexOf(ch)).toChar
-    else ('A' + res.length).toChar))
+  def pattern(s: String) =
+    if (s.length == 1) "A"
+    else s.tail.foldLeft("A")((res, ch) => res + (
+      if (ch == ''') '''
+      else if (res.length != s.indexOf(ch)) ('A' + s.indexOf(ch)).toChar
+      else ('A' + res.length).toChar))
 
   /**
    * Check if given string contain any letter.
@@ -66,6 +67,7 @@ object Dave {
   }
 
   def searchForCode(mTree: Node, message: String) = {
+
     def loop(node: Node, result: Set[Code], stack: List[(Node, Code)]): Set[Code] = {
       // Base cases:
       if (node.isEmpty)
@@ -77,19 +79,16 @@ object Dave {
         else if (stack forall (_._2() == ("*" * 26))) result
         // 3. Found one Code, but have not found best code, nor have iterated all cases, then back-track
         // and continue look for all other cases.
-        else {
-          loop(stack.last._1.nextNeighborNode, result + stack.last._2, stack.init)
-        }
+        else loop(stack.last._1.nextNeighborNode, result + stack.last._2, stack.init)
       else if (node.code isConflict stack.last._2)
         loop(node.nextNeighborNode, result, stack)
       else loop(node.nextChildrenNode, result, stack :+ (node, node.code merge stack.last._2))
     }
     val codeSet = loop(mTree, Set(), List((EmptyNode, new Code("*" * 26))))
 
-    codeSet.maxBy(x => {
+    codeSet.maxBy(x =>
       decode(message, x()).split(textSplitter).map(
-        (elem: String) => dictMap.getOrElse(elem, 0)).sum
-    })
+        (elem: String) => dictMap.getOrElse(elem, 0)).sum)
   }
   /**
    * Given cipher text, and letter map showing allowed cipher letter to plain letter mapping,
@@ -102,8 +101,7 @@ object Dave {
     def isConsistent(plainW: String): Boolean =
       if (plainW.isEmpty) true
       else (0 until cipherW.length).foldLeft(true)((acc, i) => acc && letterMap(cipherW(i))(plainW(i)))
-    generateList(patternText).filter(isConsistent) foreach println
-    generateList(patternText).filter(isConsistent)
+    generateList(patternText).filter(isConsistent).distinct
   }
 
   /**
@@ -111,16 +109,17 @@ object Dave {
    */
   def createTree(message: List[String],
     wordsMap: HashMap[Char, Set[Char]] with MultiMap[Char, Char]): Node = {
-    def loop(cipher: List[String], plainText: List[String],
+
+    def loop(cipherL: List[String], plainTextL: List[String],
       acc: Node, childNode: Node): Node = {
-      if (plainText.isEmpty && cipher.size == 1) acc
-      else if (plainText.isEmpty) {
-        val newCipher = cipher.init
-        val newPlainText = getPlainWords(newCipher.last, wordsMap) // generateList(pattern(newCipher.last))
-        loop(newCipher, newPlainText.init,
-          Node(newCipher.last, newPlainText.last, EmptyNode, acc), acc)
-      } else loop(cipher, plainText.init,
-        Node(cipher.last, plainText.last, acc, childNode), childNode)
+      if (plainTextL.isEmpty && cipherL.size == 1) acc
+      else if (plainTextL.isEmpty) {
+        val newCipherL = cipherL.init
+        val newPlainText = getPlainWords(newCipherL.last, wordsMap) // generateList(pattern(newCipher.last))
+        loop(newCipherL, newPlainText.init,
+          Node(newCipherL.last, newPlainText.last, EmptyNode, acc), acc)
+      } else loop(cipherL, plainTextL.init,
+        Node(cipherL.last, plainTextL.last, acc, childNode), childNode)
     }
     loop(message, getPlainWords(message.last, wordsMap), EmptyNode, EmptyNode)
   }
@@ -164,21 +163,17 @@ object Dave {
     def loop(wordsPattern: List[(String, List[String])],
       acc: HashMap[Char, Set[Char]] with MultiMap[Char, Char]): HashMap[Char, Set[Char]] with MultiMap[Char, Char] = {
       if (wordsPattern.isEmpty) acc
-      else {
-        loop(wordsPattern.tail, mergeMap(acc, getLetterSet(wordsPattern.head)))
-      }
+      else loop(wordsPattern.tail, mergeMap(acc, getLetterSet(wordsPattern.head)))
     }
     loop(wordsPattern, new HashMap[Char, Set[Char]] with MultiMap[Char, Char])
   }
 
   def printAllTree(node: Node): Unit = {
+    println(node)
     if (node.nextNeighborNode.isEmpty && node.nextChildrenNode.isEmpty) println("All nodes printed.")
     else if (node.nextNeighborNode.isEmpty) printAllTree(node.nextChildrenNode)
     else if (node.nextChildrenNode.isEmpty) printAllTree(node.nextNeighborNode)
-    else {
-      println(node.nextChildrenNode)
-      printAllTree(node.nextNeighborNode)
-    }
+    else printAllTree(node.nextNeighborNode)
   }
   /**
    * Find the code used to decipher the given encrypted text.
@@ -196,7 +191,6 @@ object Dave {
     println("Begin constructing wordsMap")
     // Get new wordMap based on cipherText patterns.
     val wordsMap = findWordsMap(messageSorted)
-    wordsMap foreach println
     println("wordsMap constructed.")
     println("Beginning to constructe messageTree.")
     // Get message in a tree structure, each Node contains the cipher text, and 
