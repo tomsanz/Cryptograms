@@ -28,8 +28,12 @@ object Dave {
    * Convert given string into pattern.
    * For example given cipher word "DEQGC" will return "ABCDE" as pattern text.
    */
-  def pattern(s: String) = s.tail.foldLeft("A")((res: String, y: Char) => res +
-    (if (res.length != s.indexOf(y)) 'A' + s.indexOf(y) else 'A' + res.length).toChar)
+  def pattern(s: String) = if (s.length == 1) "A"
+  else s.tail.foldLeft("A")((res, ch) => res + (
+    if (ch == ''') '''
+    else if (res.length != s.indexOf(ch)) ('A' + s.indexOf(ch)).toChar
+    else ('A' + res.length).toChar))
+
   /**
    * Check if given string contain any letter.
    */
@@ -98,7 +102,7 @@ object Dave {
     def isConsistent(plainW: String): Boolean =
       if (plainW.isEmpty) true
       else (0 until cipherW.length).foldLeft(true)((acc, i) => acc && letterMap(cipherW(i))(plainW(i)))
-
+    generateList(patternText).filter(isConsistent) foreach println
     generateList(patternText).filter(isConsistent)
   }
 
@@ -149,9 +153,9 @@ object Dave {
   }
   def findWordsMap(cipherSentence: List[String]) = {
     // List of cipher text sentence converted to list of pattern text
-    val patternList: List[String] = cipherSentence.map(x => pattern(x))
+    val patternList: List[String] = cipherSentence.map(pattern)
     // Generate list of matching plain words for each pattern text
-    val matchingPlainWords: List[List[String]] = patternList.map(x => generateList(x))
+    val matchingPlainWords = patternList.map(generateList)
     // Group cipher text, cipher text's pattern text and list of plain words matching the pattern text
     // into a three elements-tuple.
     val wordsPattern = cipherSentence zip matchingPlainWords
@@ -165,6 +169,16 @@ object Dave {
       }
     }
     loop(wordsPattern, new HashMap[Char, Set[Char]] with MultiMap[Char, Char])
+  }
+
+  def printAllTree(node: Node): Unit = {
+    if (node.nextNeighborNode.isEmpty && node.nextChildrenNode.isEmpty) println("All nodes printed.")
+    else if (node.nextNeighborNode.isEmpty) printAllTree(node.nextChildrenNode)
+    else if (node.nextChildrenNode.isEmpty) printAllTree(node.nextNeighborNode)
+    else {
+      println(node.nextChildrenNode)
+      printAllTree(node.nextNeighborNode)
+    }
   }
   /**
    * Find the code used to decipher the given encrypted text.
@@ -182,12 +196,14 @@ object Dave {
     println("Begin constructing wordsMap")
     // Get new wordMap based on cipherText patterns.
     val wordsMap = findWordsMap(messageSorted)
+    wordsMap foreach println
     println("wordsMap constructed.")
     println("Beginning to constructe messageTree.")
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
     val messageTree = createTree(messageSorted, wordsMap)
     println("messageTree constructed.")
+    printAllTree(messageTree)
 
     searchForCode(messageTree, message)
   }

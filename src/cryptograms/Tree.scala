@@ -2,20 +2,23 @@ package cryptograms
 
 case class Node(
   val cipherW: String, val plainW: String,
-  neighorNode: Node, childrenNode: Node) {
-  def nextNeighborNode = neighorNode
-  def nextChildrenNode = childrenNode
+  val nextNeighborNode: Node, val nextChildrenNode: Node) {
   override def toString = "My cipher text is: " + cipherW + ", and my plain text is: " + plainW + ".\n"
   def this(cipherW: String, plainW: String) = this(cipherW, plainW, EmptyNode, EmptyNode)
   def isEmpty = false
+  /**
+   * Return a code with cipherWord and plainWord.
+   */
   def code: Code = {
     var tempList = "*" * 26
     if (plainW.length == 0) new Code(tempList)
     else {
       for (i <- 0 until cipherW.length) {
-        val plainAssign = plainW(i) - 'A'
+        val plainAssign = (plainW(i) - 'A') max 26
         val (first, last) = tempList.splitAt(plainAssign)
-        tempList = first + cipherW(i) + last.tail
+        tempList =
+          if (plainAssign > 25) first + cipherW(i)
+          else first + cipherW(i) + last.tail
       }
       new Code(tempList)
     }

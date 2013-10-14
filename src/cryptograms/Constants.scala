@@ -9,6 +9,7 @@ object Constants {
   val quotesPath = "data/fortunes.txt"
   val mostUsedWordsPath = "data/mostUsedWords.txt"
   val words = "data/words.txt"
+  val wikiWords = "data/wiki-100k.txt"
   // Used to split sentence into words array, will not word with apostrophe.
   val textSplitter = "[^\\w*']+"
 
@@ -28,12 +29,19 @@ object Constants {
   // Load the file that contains the 6,000 quotes and convert them into a list, 
   // one quote per element.
   val quotes: List[String] = getFile(quotesPath).map(x => x drop 2)
-  // Load the top 2000 most used Englisth words into a List of string 
-  //  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-  
+
+//   Load the top 2000 most used Englisth words into a List of string 
+    val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
+
+  // wiki 100,000 words
+//  val wordsList = getFile(wikiWords).filter(x => x(0) != '#').filter(y =>
+//    y.foldLeft(true)((acc, ch) => acc && ((ch.toUpper.toInt >= 65 && ch.toUpper.toInt <= 90) ||
+//      ch.toInt == 39))).map((word: String) => word.toUpperCase)
+
   // 350,000 words.
-  val wordsList = getFile(words).map(_.toUpperCase)
-  val patternList = wordsList.map(pattern(_))
+  //  val wordsList = getFile(words).map(_.toUpperCase)
+
+  val patternList = wordsList.map(pattern)
 
   // Organize the top 2000 words into sub-category. 
   val patternMap: List[(String, String)] = patternList zip wordsList
