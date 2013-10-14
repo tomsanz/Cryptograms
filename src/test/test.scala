@@ -15,13 +15,13 @@ class SetSuite extends FunSuite {
   val code2 = new Code("*A*******G****************")
   val code3 = new Code("A**D*****G****************")
   val code4 = new Code("*B**L*****G***************")
-  val map1 = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
-  val map2 = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
-  val map3 = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
+  val map1, map2, map3, map4 = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
 
-  map1 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')))
+  map1 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')), ('D', Set('T', 'G', 'H')), ('A', Set('H', 'I', 'G')),
+      ('X', Set('G', 'A')))
   map2 += (('A', Set('G', 'H', 'F')), ('B', Set('Z', 'D', 'F', 'D')))
   map3 += (('A', Set('F')), ('B', Set('F', 'D')))
+  map4 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')))
 
   test("test Encoding") {
     assert(Dave.encode("Hello", testCode()) === "IFMMP")
@@ -50,8 +50,12 @@ class SetSuite extends FunSuite {
   }
 
   test("mergeMap") {
-    assert(Dave.mergeMap(map1, map2) == map3)
-    assert(Dave.mergeMap(map1, map2) != map2)
+    assert(Dave.mergeMap(map4, map2) == map3)
+    assert(Dave.mergeMap(map4, map2) != map2)
+  }
+  
+  test("getPlainWords") {
+    assert(Dave.getPlainWords("DAXD", map1) == List("THAT", "HIGH",""))
   }
 
 }

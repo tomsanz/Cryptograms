@@ -8,13 +8,14 @@ object Constants {
   //File path
   val quotesPath = "data/fortunes.txt"
   val mostUsedWordsPath = "data/mostUsedWords.txt"
+  val words = "data/words.txt"
   // Used to split sentence into words array, will not word with apostrophe.
   val textSplitter = "[^\\w*']+"
 
   // Patterns
-//  val letter = "\\w+".r
-//  val apostrophe = "(')".r
-//  val asterisk = "(*)".r
+  //  val letter = "\\w+".r
+  //  val apostrophe = "(')".r
+  //  val asterisk = "(*)".r
 
   // Letter appearance frequency out of 10,000. 
   val letterBestChance = Map('e' -> 1257, 't' -> 908,
@@ -28,9 +29,12 @@ object Constants {
   // one quote per element.
   val quotes: List[String] = getFile(quotesPath).map(x => x drop 2)
   // Load the top 2000 most used Englisth words into a List of string 
-  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-  val patternList = wordsList.map(pattern(_))
+  //  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
   
+  // 350,000 words.
+  val wordsList = getFile(words).map(_.toUpperCase)
+  val patternList = wordsList.map(pattern(_))
+
   // Organize the top 2000 words into sub-category. 
   val patternMap: List[(String, String)] = patternList zip wordsList
 
