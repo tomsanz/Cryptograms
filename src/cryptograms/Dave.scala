@@ -1,26 +1,24 @@
 package cryptograms
-
 import Constants._
 import fileRead._
 import collection.mutable.{ Map, MultiMap, HashMap, Set }
-
+/**
+ * CIT 591 Cryptogram Project.
+ * @Authors: Thomas Yin & Lochlain Lewis
+ */
 object Dave {
   def main(args: Array[String]): Unit = {
     val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-    val testingQuote = quotes(3600)
+    val testingQuote = quotes(2301)
 
     val encodedMessage = encode(testingQuote, testCode)
-    //    val encodedMessage = "Ubty lzm vz dy xzq j kzg dyrtqadtu," +
-    //      "D rbdyn j vzzs rbdyv rz jen de dx rbtl tatq oqtee pbjqvte"
-
     println(testingQuote)
     println(encodedMessage)
-    println("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     val discoveredCode = discoverCode(encodedMessage)
-    val decodedMessage = decode(encodedMessage, discoveredCode())
+    val decodedMessage = decode(encodedMessage, discoveredCode)
 
-    println(discoveredCode())
+    println(discoveredCode)
     println(decodedMessage)
   }
 
@@ -28,49 +26,62 @@ object Dave {
    * Convert given string into pattern.
    * For example given cipher word "DEQGC" will return "ABCDE" as pattern text.
    */
-  def pattern(s: String) =
-    if (s.length == 1) "A"
-    else s.tail.foldLeft("A")((res, ch) => res + (
-      if (ch == ''') '''
-      else if (res.length != s.indexOf(ch)) ('A' + s.indexOf(ch)).toChar
-      else ('A' + res.length).toChar))
-
+  def getPattern(s: String) = s.foldLeft("")((res, ch) => res + (
+    if (res.length != s.indexOf(ch)) 'A' + s.indexOf(ch)
+    else 'A' + res.distinct.length).toChar)
   /**
-   * Check if given string contain any letter.
+   * Check if the given string contains any letter.
    */
-  def isLetter(s: String) = s.exists(_.isLetter)
+  def isLetter(s: String) = s.forall(_.isLetter)
   /**
    * Given any pattern text, return the plain English words that match that pattern in a list.
    * Also append an empty string as the last elem in the return List.
    */
-  def generateList(patternText: String): List[String] = {
+  def generateList(patternText: String) = {
     val (_, res) = patternMap.filter(_._1 == patternText).unzip
     res ::: List("")
   }
-
-  def sortWordMessage(m: String, message: collection.immutable.Set[String]) = {
-    def f(s: collection.immutable.Set[String], acc: List[String]): List[String] = {
-      if (s.isEmpty) acc else {
-        val temp = s.maxBy(x => (x.toSet intersect acc.flatten.toSet).size)
-        f(s - temp, acc :+ temp)
+  /**
+   * Given the head cipher word from a cipher sentence, and the cipher sentence,
+   * return a list with the head cipher word as the first element of the list, and the remaining
+   * cipher texts sorted from the most amount of distinct letters shared with head elements to least.
+   */
+  def sortCipherL(headCipher: String, cipherL: collection.immutable.Set[String]) = {
+    def loop(s: collection.immutable.Set[String], acc: List[String]): List[String] = {
+      if (s.isEmpty) acc
+      else {
+        // Find the elem that share the most amt of distinct letters with current List.
+        val elem = s.maxBy(x => (x.toSet intersect acc.flatten.toSet).size)
+        loop(s - elem, acc :+ elem)
       }
     }
-    f(message - m, List(m))
+    loop(cipherL - headCipher, List(headCipher))
   }
-
-  def isBestCode(code: Code, mLetter: Int) = code().filter(_ != '*').size == mLetter
-
+  /**
+   * Check if using the given Code can convert all words in the original Cipher sentence
+   * into English. Will check against dictionary made from the top 6000 quotes on whether
+   * the word is English or Not.
+   * @Param Code found
+   * @Param original Cipher Text message.
+   */
   def isAllLetters(code: Code, message: String) = {
-    decode(message, code()).split(textSplitter).filter(isLetter).forall(x => dictMap.getOrElse(x, 0) == 1) &&
-      decode(message, code()).split(textSplitter).filter(isLetter).size ==
-      message.split(textSplitter).filter(isLetter).size
+    val decodedMessage = convertCipherTextToSet(message)
+    decodedMessage.forall(x => dictMap.getOrElse(x, 0) == 1)
   }
-
+  /**
+   * Search given node and find the code that will find the most number of plain text words
+   * in the cipher sentence.
+   */
   def searchForCode(mTree: Node, message: String) = {
+    val startTime = System.nanoTime // Start timer for time out.
 
     def loop(node: Node, result: Set[Code], stack: List[(Node, Code)]): Set[Code] = {
-      // Base cases:
-      if (node.isEmpty)
+      /* Base cases: */
+      // Terminate if the loop runs over 1 minute.
+      if ((System.nanoTime - startTime) > 60000000000L) {
+        println("Timed Out! Printing out best code found.");
+        result
+      } else if (node.isEmpty)
         // 1. Found best code available (latest code's length match with input sentence's distinct 
         // letter length.
         if (isAllLetters(stack.last._2, message)) { println("Best case found!"); Set(stack.last._2) }
@@ -97,7 +108,7 @@ object Dave {
    */
   def getPlainWords(cipherW: String,
     letterMap: HashMap[Char, Set[Char]] with MultiMap[Char, Char]) = {
-    val patternText = pattern(cipherW)
+    val patternText = getPattern(cipherW)
     def isConsistent(plainW: String): Boolean =
       if (plainW.isEmpty) true
       else (0 until cipherW.length).foldLeft(true)((acc, i) => acc && letterMap(cipherW(i))(plainW(i)))
@@ -130,7 +141,6 @@ object Dave {
     val tempMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
     for (i <- 0 until wordPair._1.length) {
       for (word <- wordPair._2; if !word.isEmpty) {
-        //        println("curent cipher word: " + wordPair._1 + ". Current plain word: " + word)
         tempMap.addBinding(wordPair._1(i), word(i))
       }
     }
@@ -145,20 +155,18 @@ object Dave {
       val values = if (map1.getOrElse(key, Set()).isEmpty) map2.getOrElse(key, Set())
       else if (map2.getOrElse(key, Set()).isEmpty) map1.getOrElse(key, Set())
       else map1.getOrElse(key, Set()) intersect map2.getOrElse(key, Set())
-      for (v <- values)
-        tempMap.addBinding(key, v)
+      for (v <- values) tempMap.addBinding(key, v)
     }
     tempMap
   }
   def findWordsMap(cipherSentence: List[String]) = {
     // List of cipher text sentence converted to list of pattern text
-    val patternList: List[String] = cipherSentence.map(pattern)
+    val patternList: List[String] = cipherSentence.map(getPattern)
     // Generate list of matching plain words for each pattern text
     val matchingPlainWords = patternList.map(generateList)
     // Group cipher text, cipher text's pattern text and list of plain words matching the pattern text
     // into a three elements-tuple.
     val wordsPattern = cipherSentence zip matchingPlainWords
-
     // Create mapping between cipher letter to possible plain text letter
     def loop(wordsPattern: List[(String, List[String])],
       acc: HashMap[Char, Set[Char]] with MultiMap[Char, Char]): HashMap[Char, Set[Char]] with MultiMap[Char, Char] = {
@@ -178,28 +186,22 @@ object Dave {
   /**
    * Find the code used to decipher the given encrypted text.
    */
-  def discoverCode(message: String) = {
+  def discoverCode(message: String): String = {
+    println("WARNING! Program may run up to 1 minute.")
     // Convert input cipher message into a Set, and remove any white space in between words.
-    val messageSet = message.toUpperCase.split(textSplitter).filter(isLetter).toSet
-    println(messageSet)
+    val messageSet = convertCipherTextToSet(message)
     // Find the word where the total length of the word divided by the total 
     // distinct letters in such word is maximum. Break ties arbitrarily.
     val firstWord = messageSet.maxBy(x => x.length / x.distinct.length.toDouble).toString
     // Get the sorted message into a List
-    val messageSorted = sortWordMessage(firstWord, messageSet)
-    println("Sentence sorted.")
-    println("Begin constructing wordsMap")
+    val messageSorted = sortCipherL(firstWord, messageSet)
     // Get new wordMap based on cipherText patterns.
     val wordsMap = findWordsMap(messageSorted)
-    println("wordsMap constructed.")
-    println("Beginning to constructe messageTree.")
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
     val messageTree = createTree(messageSorted, wordsMap)
-    println("messageTree constructed.")
     printAllTree(messageTree)
-
-    searchForCode(messageTree, message)
+    searchForCode(messageTree, message)()
   }
   /**
    * Given plain English text, returns a encoded message using the provided code.
@@ -213,9 +215,16 @@ object Dave {
   def decode(encodedText: String, code: String): String = {
     encodedText map { x =>
       if (!x.isLetter) x
-      else if (code.indexOf(x.toUpper) != -1)
-        ('A' + code.indexOf(x.toUpper)).toChar
-      else '*'
+      else if (code.indexOf(x.toUpper) == -1) '*' // Can't find cipher letter in code
+      else ('A' + code.indexOf(x.toUpper)).toChar
     }
+  }
+  /**
+   * Convert given cipher sentence by splitting the string into array of string and
+   * filter out any non letter word. Finally, return the the array in a set to remove any
+   * duplicate word.
+   */
+  private def convertCipherTextToSet(message: String): scala.collection.immutable.Set[String] = {
+    message.toUpperCase.split(textSplitter).filter(isLetter).toSet
   }
 }

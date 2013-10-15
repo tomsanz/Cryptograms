@@ -18,7 +18,7 @@ class SetSuite extends FunSuite {
   val map1, map2, map3, map4 = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
 
   map1 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')), ('D', Set('T', 'G', 'H')), ('A', Set('H', 'I', 'G')),
-      ('X', Set('G', 'A')))
+    ('X', Set('G', 'A')))
   map2 += (('A', Set('G', 'H', 'F')), ('B', Set('Z', 'D', 'F', 'D')))
   map3 += (('A', Set('F')), ('B', Set('F', 'D')))
   map4 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')))
@@ -33,9 +33,15 @@ class SetSuite extends FunSuite {
   }
 
   test("test pattern matching") {
-    assert(Dave.pattern("this") == "ABCD")
-    assert(Dave.pattern("that") == "ABCA")
-    assert(Dave.pattern("ttat") == "AACA")
+    assert(Dave.getPattern("this") == "ABCD")
+    assert(Dave.getPattern("that") == "ABCA")
+    assert(Dave.getPattern("ttat") == "AABA")
+    assert(Dave.getPattern("HELP") == "ABCD")
+    assert(Dave.getPattern("A") == "A")
+    assert(Dave.getPattern("G") == "A")
+    assert(Dave.getPattern("GG") == "AA")
+    assert(Dave.getPattern("THAT") == "ABCA")
+    assert(Dave.getPattern("THAHTA") == "ABCBAC")
   }
 
   test("test isConflict") {
@@ -53,9 +59,9 @@ class SetSuite extends FunSuite {
     assert(Dave.mergeMap(map4, map2) == map3)
     assert(Dave.mergeMap(map4, map2) != map2)
   }
-  
+
   test("getPlainWords") {
-    assert(Dave.getPlainWords("DAXD", map1) == List("THAT", "HIGH",""))
+    assert(Dave.getPlainWords("DAXD", map1) == List("THAT", "HIGH", ""))
   }
 
 }

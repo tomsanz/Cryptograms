@@ -3,7 +3,7 @@ package cryptograms
 case class Node(
   val cipherW: String, val plainW: String,
   val nextNeighborNode: Node, val nextChildrenNode: Node) {
-  override def toString = "My cipher text is: " + cipherW + ", and my plain text is: " + plainW + "."
+  override def toString = "My cipher text is: " + cipherW + ", and my plain text is: " + plainW
   def this(cipherW: String, plainW: String) = this(cipherW, plainW, EmptyNode, EmptyNode)
   def isEmpty = false
   /**
@@ -56,9 +56,4 @@ class Code(val code: String) {
     }
     new Code(result)
   }
-}
-
-class CipherWordSet(val cipherW: String, val plainW: List[String]) {
-  override def toString = "cipherWord is " + cipherW + ", and plain Word is: " + plainW
-  def zippedSet = Set(cipherW).zipAll(plainW, cipherW, "")
 }
