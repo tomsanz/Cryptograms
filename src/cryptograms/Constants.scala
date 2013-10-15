@@ -14,7 +14,13 @@ object Constants {
   val googleWordsPath = "data/google-10000-english.txt" // Top 10,000 googled English words.
 
   // Used to split sentence into words array, will not separate word with apostrophe.
-  val textSplitter = "[^\\w*']+"
+  val textSplitter = "[^*A-Za-z]+"
+
+  // Time out - Currently set to 1 minute (60 x 10^9 nano seconds)
+  val timeOut = 60000000000L
+
+  // Empty Set
+  val emptySet = Set()
 
   // Load the file that contains the 6,000 quotes and convert them into a list, 
   // one quote per element.
@@ -25,21 +31,19 @@ object Constants {
   val dictMap = dictionary.zipAll(Set(), "", 1).toMap
 
   //  All words from the 6,000 quotes.
-  //  val wordsList = dictionary.filter(isLetter(_)).toList
+  val wordsList = dictionary.filter(isLetter).toList
 
+  /*  Optional words list. */
   //   Load the top 2000 most used Englisth words into a List of string 
   //  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-
   // google 10,000 words
-  val wordsList = getFile(googleWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-
+  //  val wordsList = getFile(googleWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
   // wiki 100,000 words
-  //    val wordsList = getFile(wikiWordsPath).filter(x => x(0) != '#').filter(y =>
-  //      y.foldLeft(true)((acc, ch) => acc && ((ch.toUpper.toInt >= 65 && ch.toUpper.toInt <= 90) ||
-  //        ch.toInt == 39))).map((word: String) => word.toUpperCase)
-
+  //      val wordsList = getFile(wikiWordsPath).filter(x => x(0) != '#').filter(y =>
+  //        y.foldLeft(true)((acc, ch) => acc && ((ch.toUpper.toInt >= 65 && ch.toUpper.toInt <= 90) ||
+  //          ch.toInt == 39))).map((word: String) => word.toUpperCase)
   // 350,000 words.
-  //      val wordsList = getFile(words).map(_.toUpperCase)
+  //  val wordsList = getFile(words).map(_.toUpperCase)
 
   val patternList = wordsList.map(getPattern)
 

@@ -9,7 +9,7 @@ import collection.mutable.{ Map, MultiMap, HashMap, Set }
 object Dave {
   def main(args: Array[String]): Unit = {
     val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-    val testingQuote = quotes(2301)
+    val testingQuote = quotes(551)
 
     val encodedMessage = encode(testingQuote, testCode)
     println(testingQuote)
@@ -65,7 +65,10 @@ object Dave {
    * @Param original Cipher Text message.
    */
   def isAllLetters(code: Code, message: String) = {
-    val decodedMessage = convertCipherTextToSet(message)
+    //    println(message)
+    //    println(decode(message, code()))
+    val decodedMessage = decode(message, code()).toUpperCase.split(textSplitter).toSet
+    //    println(decodedMessage)
     decodedMessage.forall(x => dictMap.getOrElse(x, 0) == 1)
   }
   /**
@@ -78,7 +81,7 @@ object Dave {
     def loop(node: Node, result: Set[Code], stack: List[(Node, Code)]): Set[Code] = {
       /* Base cases: */
       // Terminate if the loop runs over 1 minute.
-      if ((System.nanoTime - startTime) > 60000000000L) {
+      if ((System.nanoTime - startTime) > timeOut) {
         println("Timed Out! Printing out best code found.");
         result
       } else if (node.isEmpty)
@@ -120,7 +123,6 @@ object Dave {
    */
   def createTree(message: List[String],
     wordsMap: HashMap[Char, Set[Char]] with MultiMap[Char, Char]): Node = {
-
     def loop(cipherL: List[String], plainTextL: List[String],
       acc: Node, childNode: Node): Node = {
       if (plainTextL.isEmpty && cipherL.size == 1) acc
@@ -137,45 +139,83 @@ object Dave {
   /**
    * Create mapping between cipher letter to plain letter.
    */
-  def getLetterSet(wordPair: (String, List[String])) = {
-    val tempMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
-    for (i <- 0 until wordPair._1.length) {
-      for (word <- wordPair._2; if !word.isEmpty) {
-        tempMap.addBinding(wordPair._1(i), word(i))
+  def getCipherToMap(wordPair: (String, List[String])) = {
+    val resultLetterMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
+    val cipherW = wordPair._1
+    val plainWordList = wordPair._2
+    for (i <- 0 until cipherW.length) yield {
+      for (word <- plainWordList; if !word.isEmpty) {
+        resultLetterMap.addBinding(cipherW(i), word(i))
       }
     }
-    tempMap
+    //    println("Current Cipher Text and its letter mappings: " + cipherW)
+    //    resultLetterMap foreach println
+    //    println
+    //    println("Current plain word mappings are: ")
+    //    println(plainWordList)
+    resultLetterMap
   }
-
+  /**
+   * Merge two cipher letter to plain letter maps, taking only plain letter
+   * shared in common between the two maps.
+   */
   def mergeMap(map1: HashMap[Char, Set[Char]] with MultiMap[Char, Char],
     map2: HashMap[Char, Set[Char]] with MultiMap[Char, Char]) = {
-    val tempMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
+    val resultMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
     val keys = map1.keySet union map2.keySet
     for (key <- keys) {
-      val values = if (map1.getOrElse(key, Set()).isEmpty) map2.getOrElse(key, Set())
-      else if (map2.getOrElse(key, Set()).isEmpty) map1.getOrElse(key, Set())
-      else map1.getOrElse(key, Set()) intersect map2.getOrElse(key, Set())
-      for (v <- values) tempMap.addBinding(key, v)
+      val values =
+        if (map1.getOrElse(key, emptySet).isEmpty) map2(key)
+        else if (map2.getOrElse(key, emptySet).isEmpty) map1(key)
+        else map1(key) intersect map2(key)
+      for (v <- values) resultMap.addBinding(key, v)
     }
-    tempMap
+    //    println("Current result map contains:")
+    //    resultMap foreach println
+    //    println
+    resultMap
   }
+  /**
+   * Given wordsPattern (tuple with cipher word, and possible plain word),
+   * filter out any plain word that does not meet the given HashMap.
+   */
+  def getFilteredPair(wordsPattern: (String, List[String]),
+    acc: HashMap[Char, Set[Char]] with MultiMap[Char, Char]) = {
+    val (cipherW, plainWordList) = wordsPattern
+    val filteredPlainWordList = plainWordList.filter((x: String) =>
+      x.forall((ch: Char) => {
+        val pos = x.indexOf(ch)
+        val cipherCh = cipherW(pos)
+        acc(cipherCh)(ch)
+      }))
+    (cipherW, filteredPlainWordList)
+  }
+  /**
+   * Given a list of cipher string, return the possible mapping between cipher letter to plain
+   * letter, based on given dictionary.
+   */
   def findWordsMap(cipherSentence: List[String]) = {
     // List of cipher text sentence converted to list of pattern text
-    val patternList: List[String] = cipherSentence.map(getPattern)
     // Generate list of matching plain words for each pattern text
-    val matchingPlainWords = patternList.map(generateList)
-    // Group cipher text, cipher text's pattern text and list of plain words matching the pattern text
-    // into a three elements-tuple.
+    val matchingPlainWords = cipherSentence.map(getPattern).map(generateList)
+    // Group cipher text and list of plain words matching the pattern text
+    // into a two elements-tuple.
     val wordsPattern = cipherSentence zip matchingPlainWords
     // Create mapping between cipher letter to possible plain text letter
     def loop(wordsPattern: List[(String, List[String])],
       acc: HashMap[Char, Set[Char]] with MultiMap[Char, Char]): HashMap[Char, Set[Char]] with MultiMap[Char, Char] = {
       if (wordsPattern.isEmpty) acc
-      else loop(wordsPattern.tail, mergeMap(acc, getLetterSet(wordsPattern.head)))
+      else {
+        val mergedM = mergeMap(acc, getCipherToMap(wordsPattern.head)) // initial merged map
+        val filteredPair = getFilteredPair(wordsPattern.head, mergedM)
+        loop(wordsPattern.tail, mergeMap(acc, getCipherToMap(filteredPair)))
+      }
     }
     loop(wordsPattern, new HashMap[Char, Set[Char]] with MultiMap[Char, Char])
   }
-
+  /**
+   *  Print everything in the node.
+   */
   def printAllTree(node: Node): Unit = {
     println(node)
     if (node.nextNeighborNode.isEmpty && node.nextChildrenNode.isEmpty) println("All nodes printed.")
@@ -200,7 +240,7 @@ object Dave {
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
     val messageTree = createTree(messageSorted, wordsMap)
-    printAllTree(messageTree)
+    //    printAllTree(messageTree)
     searchForCode(messageTree, message)()
   }
   /**
