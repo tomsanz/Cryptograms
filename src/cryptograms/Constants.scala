@@ -1,6 +1,6 @@
 package cryptograms
 import fileRead._
-import collection.mutable.{ HashMap, MultiMap }
+import collection.mutable.{ HashMap, MultiMap, Set }
 import Dave._
 /**
  * This object contains all the values/parameters used by the Dave Object.
@@ -19,6 +19,12 @@ object Constants {
   // Time out - Currently set to 1 minute (60 x 10^9 nano seconds)
   val timeOut = 60000000000L
 
+  // Define type name for char to char multiMap
+  type LetterMap = HashMap[Char, Set[Char]] with MultiMap[Char, Char]
+  type CipherToPlain = (String, List[String])
+  val newLetterMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
+  def newCode = new Code("*" * 26)
+  
   // Empty Set
   val emptySet = Set()
 
@@ -36,12 +42,15 @@ object Constants {
   /*  Optional words list. */
   //   Load the top 2000 most used Englisth words into a List of string 
   //  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
+
   // google 10,000 words
   //  val wordsList = getFile(googleWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
+
   // wiki 100,000 words
   //      val wordsList = getFile(wikiWordsPath).filter(x => x(0) != '#').filter(y =>
   //        y.foldLeft(true)((acc, ch) => acc && ((ch.toUpper.toInt >= 65 && ch.toUpper.toInt <= 90) ||
   //          ch.toInt == 39))).map((word: String) => word.toUpperCase)
+
   // 350,000 words.
   //  val wordsList = getFile(words).map(_.toUpperCase)
 
