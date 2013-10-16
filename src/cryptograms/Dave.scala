@@ -7,22 +7,7 @@ import scala.util.Random
  * @Authors: Thomas Yin & Lochlain Lewis
  */
 object Dave {
-  def main(args: Array[String]): Unit = {
-    val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-    val r = Random.nextInt(quotes.size)
-    println(s"Running quote number: $r")
-    val testingQuote = quotes(1672) // quotes(r)
-
-    val encodedMessage = encode(testingQuote, testCode)
-    println(testingQuote)
-    println(encodedMessage)
-
-    val discoveredCode = discoverCode(encodedMessage)
-    val decodedMessage = decode(encodedMessage, discoveredCode)
-
-    println(discoveredCode)
-    println(decodedMessage)
-  }
+  def main(args: Array[String]): Unit = {}
 
   /**
    * Convert given string into pattern.
@@ -227,7 +212,7 @@ object Dave {
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
     val messageTree = createTree(messageSorted, wordsMap)
-    printAllTree(messageTree)
+    //    printAllTree(messageTree)
     searchForCode(messageTree, message)()
   }
   /**
