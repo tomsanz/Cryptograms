@@ -1,4 +1,8 @@
 package cryptograms
+/**
+ * CIT 591 Cryptogram Project.
+ * @Authors: Thomas Yin & Lochlain Lewis
+ */
 import fileRead._
 import collection.mutable.{ HashMap, MultiMap, Set }
 import Dave._
@@ -7,15 +11,15 @@ import Dave._
  */
 object Constants {
   /* File path for various word databases. */
-  val quotesPath = "data/fortunes.txt" // 6000 Quotes.
-  val mostUsedWordsPath = "data/mostUsedWords.txt" // top 2000 most used words.
+  val quotesPath = "data/fortunes.txt" // 9193 Quotes.
+  /*  val mostUsedWordsPath = "data/mostUsedWords.txt" // top 2000 most used words.
   val words = "data/words.txt" // 350,000 words from Internet.
   val wikiWordsPath = "data/wikiWords.txt" // Top 100,000 words from Wikipedia.
-  val googleWordsPath = "data/google-10000-english.txt" // Top 10,000 googled English words.
+  val googleWordsPath = "data/google-10000-english.txt" // Top 10,000 googled English words.*/
   val tinyWordsPath = "data/ed-tiny.txt"
 
   // Used to split sentence into words array, will not separate word with apostrophe.
-  val textSplitter = "[^*A-Za-z]+"
+  val textSplitter = "[^*A-Za-z']+"
 
   // Time out - Currently set to 1 minute (60 x 10^9 nano seconds)
   val timeOut = 60000000000L
@@ -29,33 +33,15 @@ object Constants {
 
   // Load the file that contains the 6,000 quotes and convert them into a list, 
   // one quote per element.
-  val quotes: List[String] = getFile(quotesPath).map(x => x drop 2)
+  val quotes: List[String] = getFile(quotesPath).map(_ drop 2)
 
-  // Create dictionary from the 6000 quotes.
+  // Create dictionary using the 6000 quotes.
   val dictionary = quotes.map(_.split("\\W+")).flatten.toSet.map((x: String) => x.toUpperCase)
   val dictMap = dictionary.zipAll(Set(), "", 1).toMap
 
-  //  All words from the 6,000 quotes.
-//  val wordsList = dictionary.filter(isLetter).toList
   val wordsList = getFile(tinyWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-  /*  Optional words list. */
-  //   Load the top 2000 most used Englisth words into a List of string 
-  //  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-
-  // google 10,000 words
-  //  val wordsList = getFile(googleWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
-
-  // wiki 100,000 words
-  //      val wordsList = getFile(wikiWordsPath).filter(x => x(0) != '#').filter(y =>
-  //        y.foldLeft(true)((acc, ch) => acc && ((ch.toUpper.toInt >= 65 && ch.toUpper.toInt <= 90) ||
-  //          ch.toInt == 39))).map((word: String) => word.toUpperCase)
-
-  // 350,000 words.
-  //  val wordsList = getFile(words).map(_.toUpperCase)
-
   val patternList = wordsList.map(getPattern)
 
-  // Organize the top 2000 words into sub-category. 
+  // Organize the words into sub-category. 
   val patternMap: List[(String, String)] = patternList zip wordsList
-
 }

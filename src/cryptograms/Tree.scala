@@ -1,5 +1,12 @@
 package cryptograms
+/**
+ * CIT 591 Cryptogram Project.
+ * @Authors: Thomas Yin & Lochlain Lewis
+ */
 
+/**
+ * Class definitions used by Dave.scala file.
+ */
 case class Node(
   val cipherW: String, val plainW: String,
   val nextNeighborNode: Node, val nextChildrenNode: Node) {
@@ -38,9 +45,11 @@ class Code(val code: String) {
    */
   def isConflict(that: Code) = {
     that().foldLeft(false)((res, ch) =>
-      // if that ch is a letter AND this code contains ch, AND this ch's position is different than that ch's position   
+      // if that ch is a letter AND this code contains ch, 
+      // AND this ch's position is different than that ch's position   
       res || ((ch.isLetter && this().contains(ch) && this().indexOf(ch) != that().indexOf(ch)) ||
-        // if that ch is a letter, AND at that's position in this, there is a letter, AND the letters are different
+        // if that ch is a letter, AND at that's position in this, 
+        // there is a letter, AND the letters are different
         (ch.isLetter && this()(that().indexOf(ch)).isLetter && ch != this()(that().indexOf(ch)))))
   }
   def apply() = code

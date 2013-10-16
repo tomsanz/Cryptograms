@@ -11,7 +11,7 @@ object Dave {
     val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
     val r = Random.nextInt(quotes.size)
     println(s"Running quote number: $r")
-    val testingQuote = quotes(r)
+    val testingQuote = quotes(1672) // quotes(r)
 
     val encodedMessage = encode(testingQuote, testCode)
     println(testingQuote)
@@ -67,10 +67,7 @@ object Dave {
    * @Param original Cipher Text message.
    */
   def isAllLetters(code: Code, message: String) = {
-    //    println(message)
-    //    println(decode(message, code()))
     val decodedMessage = getStringFromSentence(decode(message, code()))
-    //    println(decodedMessage)
     decodedMessage.forall(x => dictMap.getOrElse(x, 0) == 1)
   }
   /**
@@ -80,8 +77,6 @@ object Dave {
   def searchForCode(mTree: Node, message: String) = {
     val startTime = System.nanoTime // Start timer for time out.
     def loop(node: Node, result: Set[Code], stack: List[(Node, Code)]): Set[Code] = {
-      //      println("evaluating node: " + node.toString)
-      //      println("mTree is empty? " + node.isEmpty)
       /* Base cases: */
       // Terminate if the loop runs over 1 minute.
       if ((System.nanoTime - startTime) > timeOut) {
@@ -103,8 +98,6 @@ object Dave {
       else loop(node.nextChildrenNode, result, stack :+ (node, node.code merge stack.last._2))
     }
     val codeSet = loop(mTree, Set(), List((EmptyNode, newCode)))
-    //    println("Printing codeSet:")
-    //    codeSet foreach println
     codeSet.maxBy(x =>
       decode(message, x()).split(textSplitter).map(
         (elem: String) => dictMap.getOrElse(elem, 0)).sum)
@@ -152,11 +145,6 @@ object Dave {
         resultLetterMap.addBinding(cipherW(i), word(i))
       }
     }
-    //    println("Current Cipher Text and its letter mappings: " + cipherW)
-    //    resultLetterMap foreach println
-    //    println
-    //    println("Current plain word mappings are: ")
-    //    println(plainWordList)
     resultLetterMap
   }
   /**
@@ -173,9 +161,6 @@ object Dave {
         else map1(key) intersect map2(key)
       for (v <- values) resultMap.addBinding(key, v)
     }
-    //    println("Current result map contains:")
-    //    resultMap foreach println
-    //    println
     resultMap
   }
   /**
@@ -242,7 +227,7 @@ object Dave {
     // Get message in a tree structure, each Node contains the cipher text, and 
     // set of potential plain word text match.
     val messageTree = createTree(messageSorted, wordsMap)
-    //    printAllTree(messageTree)
+    printAllTree(messageTree)
     searchForCode(messageTree, message)()
   }
   /**
