@@ -9,9 +9,8 @@ import scala.util.Random
 object Dave {
   def main(args: Array[String]): Unit = {
     val testCode = "BCDEFGHIJKLMNOPQRSTUVWXYZA"
-    //        val testingQuote = quotes(550)
     val r = Random.nextInt(quotes.size)
-    println(s"Running quote number: ${r.toString}")
+    println(s"Running quote number: $r")
     val testingQuote = quotes(r)
 
     val encodedMessage = encode(testingQuote, testCode)

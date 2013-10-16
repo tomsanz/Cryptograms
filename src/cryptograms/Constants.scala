@@ -12,6 +12,7 @@ object Constants {
   val words = "data/words.txt" // 350,000 words from Internet.
   val wikiWordsPath = "data/wikiWords.txt" // Top 100,000 words from Wikipedia.
   val googleWordsPath = "data/google-10000-english.txt" // Top 10,000 googled English words.
+  val tinyWordsPath = "data/ed-tiny.txt"
 
   // Used to split sentence into words array, will not separate word with apostrophe.
   val textSplitter = "[^*A-Za-z]+"
@@ -19,13 +20,11 @@ object Constants {
   // Time out - Currently set to 1 minute (60 x 10^9 nano seconds)
   val timeOut = 60000000000L
 
-  // Define type name for char to char multiMap
+  // Define type alias
   type LetterMap = HashMap[Char, Set[Char]] with MultiMap[Char, Char]
   type CipherToPlain = (String, List[String])
   val newLetterMap = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
   def newCode = new Code("*" * 26)
-  
-  // Empty Set
   val emptySet = Set()
 
   // Load the file that contains the 6,000 quotes and convert them into a list, 
@@ -37,8 +36,8 @@ object Constants {
   val dictMap = dictionary.zipAll(Set(), "", 1).toMap
 
   //  All words from the 6,000 quotes.
-  val wordsList = dictionary.filter(isLetter).toList
-
+//  val wordsList = dictionary.filter(isLetter).toList
+  val wordsList = getFile(tinyWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
   /*  Optional words list. */
   //   Load the top 2000 most used Englisth words into a List of string 
   //  val wordsList = getFile(mostUsedWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
