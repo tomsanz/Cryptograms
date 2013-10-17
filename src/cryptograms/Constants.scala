@@ -6,6 +6,7 @@ package cryptograms
 import fileRead._
 import collection.mutable.{ HashMap, MultiMap, Set }
 import Dave._
+import Common._
 /**
  * This object contains all the values/parameters used by the Dave Object.
  */

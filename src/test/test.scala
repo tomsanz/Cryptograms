@@ -1,5 +1,6 @@
 package test
-import cryptograms.Dave
+import cryptograms._
+import cryptograms.Common._
 import org.scalatest.FunSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -17,8 +18,8 @@ class SetSuite extends FunSuite {
   val code4 = new Code("*B**L*****G***************")
   val map1, map2, map3, map4 = new HashMap[Char, Set[Char]] with MultiMap[Char, Char]
 
-  map1 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')), ('D', Set('T', 'G', 'H')), ('A', Set('H', 'I', 'G')),
-    ('X', Set('G', 'A')))
+  map1 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')),
+    ('D', Set('T', 'G', 'H')), ('A', Set('H', 'I', 'G')), ('X', Set('G', 'A')))
   map2 += (('A', Set('G', 'H', 'F')), ('B', Set('Z', 'D', 'F', 'D')))
   map3 += (('A', Set('F')), ('B', Set('F', 'D')))
   map4 += (('A', Set('D', 'E', 'F')), ('B', Set('E', 'F', 'C', 'D')))
@@ -33,15 +34,15 @@ class SetSuite extends FunSuite {
   }
 
   test("test pattern matching") {
-    assert(Dave.getPattern("this") == "ABCD")
-    assert(Dave.getPattern("that") == "ABCA")
-    assert(Dave.getPattern("ttat") == "AABA")
-    assert(Dave.getPattern("HELP") == "ABCD")
-    assert(Dave.getPattern("A") == "A")
-    assert(Dave.getPattern("G") == "A")
-    assert(Dave.getPattern("GG") == "AA")
-    assert(Dave.getPattern("THAT") == "ABCA")
-    assert(Dave.getPattern("THAHTA") == "ABCBAC")
+    assert(getPattern("this") == "ABCD")
+    assert(getPattern("that") == "ABCA")
+    assert(getPattern("ttat") == "AABA")
+    assert(getPattern("HELP") == "ABCD")
+    assert(getPattern("A") == "A")
+    assert(getPattern("G") == "A")
+    assert(getPattern("GG") == "AA")
+    assert(getPattern("THAT") == "ABCA")
+    assert(getPattern("THAHTA") == "ABCBAC")
   }
 
   test("test isConflict") {
@@ -56,12 +57,12 @@ class SetSuite extends FunSuite {
   }
 
   test("mergeMap") {
-    assert(Dave.mergeMap(map4, map2) == map3)
-    assert(Dave.mergeMap(map4, map2) != map2)
+    assert(DiscoverCode.mergeMap(map4, map2) == map3)
+    assert(DiscoverCode.mergeMap(map4, map2) != map2)
   }
 
   test("getPlainWords") {
-    assert(Dave.getPlainWords("DAXD", map1) == List("THAT", "HIGH", ""))
+    assert(DiscoverCode.getPlainWords("DAXD", map1) == List("THAT", "HIGH", ""))
   }
 
 }
