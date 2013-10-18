@@ -3,9 +3,9 @@ package cryptograms
  * CIT 591 Cryptogram Project.
  * @Authors: Thomas Yin & Lochlain Lewis
  */
+import util.Random
 object Dave {
-  def main(args: Array[String]): Unit = {
-  }
+  def main(args: Array[String]): Unit = {}
 
   /**
    * Find the code used to decipher the given encrypted text.

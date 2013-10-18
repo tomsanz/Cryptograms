@@ -15,9 +15,9 @@ object Constants {
   val quotesPath = "data/fortunes.txt" // 9193 Quotes.
   /*  val mostUsedWordsPath = "data/mostUsedWords.txt" // top 2000 most used words.
   val words = "data/words.txt" // 350,000 words from Internet.
-  val wikiWordsPath = "data/wikiWords.txt" // Top 100,000 words from Wikipedia.
-  val googleWordsPath = "data/google-10000-english.txt" // Top 10,000 googled English words.*/
-  val tinyWordsPath = "data/ed-tiny.txt"
+  val wikiWordsPath = "data/wiki100k.txt" // Top 100,000 words from Wikipedia.*/
+  val googleWordsPath = "data/google-10000-english.txt" // Top 10,000 googled English words. 
+  //    val tinyWordsPath = "data/ed-tiny.txt"
 
   // Used to split sentence into words array, will not separate word with apostrophe.
   val textSplitter = "[^*A-Za-z']+"
@@ -25,6 +25,7 @@ object Constants {
   // Time out - Currently set to 1 minute (60 x 10^9 nano seconds)
   val timeOut = 60000000000L
 
+  val aToZ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   // Define type alias
   type LetterMap = HashMap[Char, Set[Char]] with MultiMap[Char, Char]
   type CipherToPlain = (String, List[String])
@@ -40,7 +41,7 @@ object Constants {
   val dictionary = quotes.map(_.split("\\W+")).flatten.toSet.map((x: String) => x.toUpperCase)
   val dictMap = dictionary.zipAll(Set(), "", 1).toMap
 
-  val wordsList = getFile(tinyWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
+  val wordsList = getFile(googleWordsPath).map(_.dropWhile(!_.isLetter).toUpperCase)
   val patternList = wordsList.map(getPattern)
 
   // Organize the words into sub-category. 

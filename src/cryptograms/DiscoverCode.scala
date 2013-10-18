@@ -21,7 +21,14 @@ object DiscoverCode {
     // set of potential plain word text match.
     val messageTree = createTree(messageSorted, wordsMap)
     //    printAllTree(messageTree)
-    searchForCode(messageTree, message)()
+    fillBlank(searchForCode(messageTree, message))
+  }
+
+  def fillBlank(code: Code): String = {
+    val currentCode = code()
+    currentCode.foldLeft("")((acc: String, x: Char) => acc +
+      (if (x.isLetter) x
+      else aToZ.filter((y: Char) => !acc.contains(y)).head))
   }
 
   /**
@@ -87,9 +94,13 @@ object DiscoverCode {
       else loop(node.nextChildrenNode, result, stack :+ (node, node.code merge stack.last._2))
     }
     val codeSet = loop(mTree, Set(), List((EmptyNode, newCode)))
-    codeSet.maxBy(x =>
-      Dave.decode(message, x()).split(textSplitter).map(
-        (elem: String) => dictMap.getOrElse(elem, 0)).sum)
+    val codeFound =
+      codeSet.maxBy(x =>
+        Dave.decode(message, x()).split(textSplitter).map(
+          (elem: String) => dictMap.getOrElse(elem, 0)).sum)
+
+    println(codeFound())
+    codeFound
   }
   /**
    * Given cipher text, and letter map showing allowed cipher letter to plain letter mapping,
